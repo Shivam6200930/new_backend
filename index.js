@@ -96,7 +96,7 @@ app.use(
   session({
     key: 'id',
   secret: process.env.jwt_secret_key,
-  resave: true,
+  resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
