@@ -16,8 +16,7 @@ const sessionMiddleware = session({
     httpOnly: true,
     secure: true, // Secure only in production
     sameSite: 'none', // Adjust for compatibility if needed
-    session:true,
-    expires: 1000 * 60 * 60 * 24 * 7, // 7 days
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   },
 });
 async function connectDb(DATABASE_URL) {
