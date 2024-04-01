@@ -83,7 +83,7 @@ connectDb(DATABASE_URL)
 // app.use(cors(corsOptions));
 
 const corsOptions = {
-  origin: 'https://martforntrender.vercel.app',
+  origin: 'https://front-mart-seven.vercel.app',
   credentials: true, 
   exposedHeaders: ['Set-Cookie'],
 };
