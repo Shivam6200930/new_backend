@@ -54,6 +54,18 @@ import cookieParser from 'cookie-parser'
 import formData from 'express-form-data'
 import bodyParser from 'body-parser'
 import session from 'express-session'
+import connectRedis from 'connect-redis';
+import Redis from 'ioredis';
+
+
+const RedisStore = connectRedis(session);
+const redisClient = new Redis({
+    // Redis configuration options
+    host: 'localhost', // Redis server hostname
+    port: 6379, // Redis server port
+    // Add more configuration options if needed
+});
+
 async function connectDb(DATABASE_URL) {
     try {
         const DB_options = {
@@ -94,6 +106,7 @@ app.use(formData.parse());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     key: 'id',
   secret: process.env.jwt_secret_key,
   resave: false,
