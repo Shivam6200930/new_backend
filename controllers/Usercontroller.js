@@ -78,8 +78,8 @@ class Usercontroller {
               process.env.jwt_secret_key,
               { expiresIn: "7d" }
             );
-            res.cookie("shivam", token, { httpOnly: true },{ maxAge: 24 * 60 * 60 * 1000 });
-            res.status(200).json({ message: "Login Sucessfull", user: User });
+            res.cookie("shivam", token, { httpOnly: true,secure: true,  path: '/' ,sameSite:'none'});
+            res.status(200).json({ message: "Login Sucessfull", user: User,token :token });
           } else {
             res.status(400).json({ message: "Invalid email or password" });
           }
