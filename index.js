@@ -102,7 +102,8 @@ app.use(
     httpOnly: true,
     secure: true, // Secure only in production
     sameSite: 'none', // Adjust for compatibility if needed
-    maxAge: 1000 * 60 * 60 * 24, // Uncomment for explicit expiration
+    // maxAge: 1000 * 60 * 60 * 24, // Uncomment for explicit expiration
+    expiresIn: "7d"
   },
   })
     )
