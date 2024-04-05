@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 class Usercontroller {
   static UserRegistration = async (req, res) => {
-    const { name, email, password, password_confirm } = req.body;
+    const { name, email, password, password_confirm,ph } = req.body;
     try {
       const User = await user.findOne({ email: email });
       if (User) {
@@ -18,6 +18,7 @@ class Usercontroller {
               name: name,
               email: email,
               password: hashPassword,
+              phone:ph
             });
             await doc.save();
             const saved_user = await user.findOne({ email: email });
@@ -27,7 +28,7 @@ class Usercontroller {
               process.env.jwt_secret_key,
               { expiresIn: "7d" }
             );
-
+            res.cookie("shivam", token, { httpOnly: true,secure: true, maxAge: 1000 * 60 * 60 * 24 * 7,  path: '/' ,sameSite:'none'});
             const mailOptions = {
               from: process.env.EMAILFROM,
               to: saved_user.email,
