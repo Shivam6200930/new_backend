@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 class Usercontroller {
   static UserRegistration = async (req, res) => {
-    const { name, email, password, password_confirm,ph } = req.body;
+    const { name, email, password, password_confirm,phone } = req.body;
     try {
       const User = await user.findOne({ email: email });
       if (User) {
@@ -18,7 +18,7 @@ class Usercontroller {
               name: name,
               email: email,
               password: hashPassword,
-              phone:ph
+              phone:phone
             });
             await doc.save();
             const saved_user = await user.findOne({ email: email });
@@ -62,7 +62,8 @@ class Usercontroller {
         }
       }
     } catch (err) {
-      res.status(400).json({ message: "something went wrong" });
+      console.error("Registration error:", err);
+      res.status(400).json({ message: "Registration failed. Please try again later." });
     }
   };
 
