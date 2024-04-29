@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import formData from 'express-form-data';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-
+import passport from 'passport';
 const sessionMiddleware = session({
   key: 'id',
   secret: process.env.jwt_secret_key,
@@ -19,6 +19,7 @@ const sessionMiddleware = session({
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   },
 });
+
 async function connectDb(DATABASE_URL) {
   try {
     const DB_options = {
@@ -38,7 +39,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 connectDb(DATABASE_URL);
 
 const corsOptions = {
-  origin: '*',
+  origin: 'https://front-mart-seven.vercel.app',
   credentials: true,
   exposedHeaders: ['Set-Cookie'],
 };

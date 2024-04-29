@@ -4,6 +4,7 @@ import Usercontroller from '../controllers/Usercontroller.js';
 import checkUserAuth from '../middlewares/auth-middleware.js';
 import imageupload from '../controllers/imageupload.js'
 import {payment_generated,payment,verify} from '../payment/Razorpay.js'
+import passport from 'passport';
 
 //procted router 
 router.use('/changepassword',checkUserAuth)
@@ -29,6 +30,24 @@ router.post('/razorpay/order',payment_generated)
 router.post('/razorpay/capture/:paymentId',payment)
 router.post('/order_history/:userId',Usercontroller.order_history)
 router.post('razorpay/verify-signature',verify)
+// router.get('/google',
+//   passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// router.get('/google/callback',
+//   passport.authenticate('google', { failureRedirect: '/login' }),
+//   (req, res) => {
+//     res.redirect('/');
+//   });
+
+// router.get('/github',
+//   passport.authenticate('github'));
+
+// router.get('/github/callback',
+//   passport.authenticate('github', { failureRedirect: '/login' }),
+//   (req, res) => {
+//     res.redirect('/');
+//   });
+
 //proctece
 router.post('/changepassword',Usercontroller.changeUserpassword)
 router.get('/loggedUser',Usercontroller.loggedUser)
