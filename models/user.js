@@ -2,12 +2,24 @@ import mongoose, { mongo } from 'mongoose';
 
 
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true,validate: {
-        validator: validator.isEmail,
-        message: 'Please use a valid email address',
-      }, },
-    password: { type: String, required: true, trim: true,minlength: 6, match: [
+    name: {
+         type: String,
+         required: true,
+         trim: true },
+    email: {
+         type: String, 
+         required: true, 
+         trim: true ,
+         match: [
+            /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+            'Please use a valid email address',
+          ],
+        },
+    password: { type: String, 
+        required: true, 
+        trim: true,
+        minlength: 6, 
+        match: [
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
         'Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
       ], },
