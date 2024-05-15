@@ -63,7 +63,7 @@ class Usercontroller {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      res.status(400).json({ message: "Registration failed. Please try again later." });
+      res.status(400).json({ message:err });
     }
   };
 
@@ -267,15 +267,15 @@ class Usercontroller {
   static userDelete = async (req, res) => {
     const { id } = req.params;
     try {
-      await user.findByIdAndDelete(id);
-      res.status(200).json({ message: "User deleted are successfully" });
+      const deletedUser = await user.findByIdAndDelete(id);
+      if (!deletedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json({ message: "User deleted successfully" });
     } catch (err) {
-      res
-        .status(400)
-        .json({ status: "failed", message: "User are not deleted" });
+      res.status(400).json({ status: "failed", message: "User was not deleted" });
     }
   };
-
   static UserLogout = async (req, res) => {
     try {
       res.clearCookie("shivam");
@@ -288,11 +288,12 @@ class Usercontroller {
   static UserEdit = async (req, res) => {
     const id = req.params.user_id;
     const User = await user.findById(id);
-    const { user_name } = req.body;
+    const { user_name , user_phone} = req.body;
     if (!User) {
       res.status(400).json({ message: "failed" });
     } else {
       User.name = user_name;
+      User.phone=user_phone;
       User.save();
       res.status(200).json({ message: "saved", User });
     }

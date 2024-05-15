@@ -7,12 +7,9 @@ const authController = (passport) => {
       },
       (accessToken, refreshToken, profile, done) => {
         console.log(profile)
-        // Use profile information (e.g., profile.id) to create or find a user in your database
-        // Call done(null, user) when finished
       }
     ));
   
-    // GitHub OAuth Strategy
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
