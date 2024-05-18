@@ -15,20 +15,18 @@ const userSchema = new mongoose.Schema({
             'Please use a valid email address',
           ],
         },
-    password: { type: String, 
+    password: { 
+        type: String, 
         required: true, 
-        trim: true,
-        minlength: 6, 
-        match: [
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-        'Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      ], },
+        trim: true, 
+      },
     phone:{type:String,required: true, trim: true,match: [
         /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
         'Please enter a valid phone number',
       ],},
     profileImageUrl: { type: String},
-    orderHistory: [{ type: Object }]
+    orderHistory: [{ type: Object }],
+    role:{type:String,required:true}
 }, { timestamps: true }); 
 
 

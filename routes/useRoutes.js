@@ -10,7 +10,13 @@ import passport from 'passport';
 router.use('/changepassword',checkUserAuth)
 router.use('/loggedUser',checkUserAuth)
 router.use('/edit',checkUserAuth)
+router.use('/delete/:id',checkUserAuth)
 
+router.use('/razorpay/order',checkUserAuth)
+router.use('/razorpay/capture/:paymentId',checkUserAuth)
+router.use('/order_history/:userId',checkUserAuth)
+router.use('razorpay/verify-signature',checkUserAuth)
+router.use('/contact',checkUserAuth)
 router.get('/', (req, res) => {
     res.send("Hello World");
 });
@@ -47,6 +53,7 @@ router.post('razorpay/verify-signature',verify)
 //   (req, res) => {
 //     res.redirect('/');
 //   });
+
 
 //proctece
 router.post('/changepassword',Usercontroller.changeUserpassword)

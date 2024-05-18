@@ -14,11 +14,13 @@ class Usercontroller {
           if (password === password_confirm) {
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(password, salt);
+            const role = email === 'mandalshivam962@gmail.com' ? 'admin' : 'user';
             const doc = new user({
               name: name,
               email: email,
               password: hashPassword,
-              phone:phone
+              phone:phone,
+              role
             });
             await doc.save();
             const saved_user = await user.findOne({ email: email });
@@ -63,7 +65,7 @@ class Usercontroller {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      res.status(400).json({ message:err });
+      res.status(400).json(err.errors );
     }
   };
 
