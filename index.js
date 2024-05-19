@@ -39,7 +39,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 connectDb(DATABASE_URL);
 
 const corsOptions = {
-  origin:'https://front-mart-shivam-mandals-projects.vercel.app',
+  origin:'*',
   credentials: true,
   exposedHeaders: ['Set-Cookie'],
 };
