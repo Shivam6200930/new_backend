@@ -375,35 +375,33 @@ class Usercontroller {
 
   static order_history = async (req, res) => {
     try {
-        const id = req.params.userId;
-        const buyProducts = req.body.products_details;
-        console.log(`order_history ${JSON.stringify(buyProducts)}`);
+      const id = req.params.userId;
+      const buyProducts = req.body.products_details;
+      console.log(`order_history ${JSON.stringify(buyProducts)}`);
 
-        const User = await user.findById(id);
+      const User = await user.findById(id);
 
-        if (!User) {
-            return res.status(404).json({
-                status: "Not Found",
-                message: "User not found in our database"
-            });
-        }
-        buyProducts.forEach(product => {
-            User.orderHistory.push(product);
-        });
+      if (!User) {
+          return res.status(404).json({
+              status: "Not Found",
+              message: "User not found in our database"
+          });
+      }
+      User.orderHistory = [...User.orderHistory, ...buyProducts];
 
-        await User.save();
+      await User.save();
 
-        return res.status(200).json({
-            status: "Success",
-            message: "Order history updated successfully"
-        });
-    } catch (error) {
-        console.error('Error updating order history:', error);
-        return res.status(500).json({
-            status: "Error",
-            message: "An error occurred while updating order history"
-        });
-    }
+      return res.status(200).json({
+          status: "Success",
+          message: "Order history updated successfully"
+      });
+  } catch (error) {
+      console.error('Error updating order history:', error);
+      return res.status(500).json({
+          status: "Error",
+          message: "An error occurred while updating order history"
+      });
+  }
 }
 
 }
