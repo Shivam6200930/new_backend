@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import formData from 'express-form-data';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-import passport from 'passport';
+// import passport from 'passport';
 const sessionMiddleware = session({
   key: 'id',
   secret: process.env.jwt_secret_key,
@@ -39,8 +39,8 @@ const DATABASE_URL = process.env.DATABASE_URL;
 connectDb(DATABASE_URL);
 
 const corsOptions = {
-  // origin:process.env.frontend_url,
-  origin:'*',
+  origin:process.env.frontend_url,
+  // origin:'*',
   credentials: true,
   exposedHeaders: ['Set-Cookie'],
 };

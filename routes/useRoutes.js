@@ -4,7 +4,7 @@ import Usercontroller from '../controllers/Usercontroller.js';
 import checkUserAuth from '../middlewares/auth-middleware.js';
 import imageupload from '../controllers/imageupload.js'
 import {payment_generated,payment,verify} from '../payment/Razorpay.js'
-import passport from 'passport';
+// import passport from 'passport';
 
 //procted router 
 router.use('/changepassword',checkUserAuth)
@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
 });
 router.post('/register',Usercontroller.UserRegistration)
 router.post('/login',Usercontroller.UserLogin)
-router.post('/google-login',Usercontroller.UserLoginGoogle)
+// router.post('/google-login',Usercontroller.UserLoginGoogle)
 router.post('/sendresetPassword',Usercontroller.resetPassword)
 router.put('/resetPassword/:id/:token',Usercontroller.userPasswordReset)
 router.delete('/delete/:id',Usercontroller.userDelete)
