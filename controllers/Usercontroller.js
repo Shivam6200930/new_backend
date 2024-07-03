@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 class Usercontroller {
   static UserRegistration = async (req, res) => {
-    const { name, email, password, password_confirm,phone } = req.body;
+    const { name, email, password, password_confirm, phone } = req.body;
     try {
       const User = await user.findOne({ email: email });
       if (User) {
@@ -14,13 +14,14 @@ class Usercontroller {
           if (password === password_confirm) {
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(password, salt);
-            const role = email === 'mandalshivam962@gmail.com' ? 'admin' : 'user';
+            const role =
+              email === "mandalshivam962@gmail.com" ? "admin" : "user";
             const doc = new user({
               name: name,
               email: email,
               password: hashPassword,
-              phone:phone,
-              role
+              phone: phone,
+              role,
             });
             await doc.save();
             const saved_user = await user.findOne({ email: email });
@@ -30,7 +31,13 @@ class Usercontroller {
               process.env.jwt_secret_key,
               { expiresIn: "7d" }
             );
-            res.cookie("shivam", token, { httpOnly: true,secure: true, maxAge: 1000 * 60 * 60 * 24 * 7,  path: '/' ,sameSite:'none'});
+            res.cookie("shivam", token, {
+              httpOnly: true,
+              secure: true,
+              maxAge: 1000 * 60 * 60 * 24 * 7,
+              path: "/",
+              sameSite: "none",
+            });
             const mailOptions = {
               from: process.env.EMAILFROM,
               to: saved_user.email,
@@ -46,13 +53,11 @@ class Usercontroller {
               }
             });
 
-            res
-              .status(200)
-              .json({
-                message: "data saved",
-                token: token,
-                mail: "email send sucessful",
-              });
+            res.status(200).json({
+              message: "data saved",
+              token: token,
+              mail: "email send sucessful",
+            });
           } else {
             res.send({
               status: "failed",
@@ -65,12 +70,12 @@ class Usercontroller {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      res.status(400).json(err.errors );
+      res.status(400).json(err.errors);
     }
   };
 
   static UserLogin = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password , loggedIn } = req.body;
     try {
       if (email && password) {
         const User = await user.findOne({ email: email });
@@ -82,8 +87,25 @@ class Usercontroller {
               process.env.jwt_secret_key,
               { expiresIn: "7d" }
             );
-            res.cookie("shivam", token, { httpOnly: true,secure: true, maxAge: 1000 * 60 * 60 * 24 * 7,  path: '/' ,sameSite:'none'});
-            res.status(200).json({ message: "Login Sucessfull", user: User,token :token });
+            res.cookie("shivam", token, {
+              httpOnly: true,
+              secure: true,
+              maxAge: 1000 * 60 * 60 * 24 * 7,
+              path: "/",
+              sameSite: "none",
+            });
+            User.loggedExpire=new Date(Date.now()+1000*60*60*24*7);
+            if(User.loggedExpire != Date.now()){
+              User.loggedIn=true;
+            }else{
+              User.loggedIn=false;
+            }
+            
+
+            User.save();
+            res
+              .status(200)
+              .json({ message: "Login Sucessfull", user: User, token: token });
           } else {
             res.status(400).json({ message: "Invalid email or password" });
           }
@@ -99,6 +121,7 @@ class Usercontroller {
     }
   };
 
+  
   static changeUserpassword = async (req, res) => {
     const { password, password_confirm } = req.body;
     const foundUser = await user.findById(req.user._id);
@@ -128,12 +151,10 @@ class Usercontroller {
             console.log("Email sent: " + info.response);
           }
         });
-        res
-          .status(200)
-          .json({
-            message: "password are changed",
-            mail: "you sucesfully change your password",
-          });
+        res.status(200).json({
+          message: "password are changed",
+          mail: "you sucesfully change your password",
+        });
       } else {
         res
           .status(400)
@@ -161,7 +182,7 @@ class Usercontroller {
             expiresIn: "10m",
           });
 
-          const link = `http://127.0.0.1:5173/api/users/resetPassword/${User._id}/${token}`;
+          const link = `${process.env.frontend_url}/api/users/resetPassword/${User._id}/${token}`;
           const mailOptions = {
             from: process.env.EMAIL_FROM,
             to: User.email,
@@ -173,20 +194,16 @@ class Usercontroller {
           transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
               console.error(error);
-              res
-                .status(500)
-                .json({
-                  status: "failed",
-                  message: "Failed to send reset email",
-                });
+              res.status(500).json({
+                status: "failed",
+                message: "Failed to send reset email",
+              });
             } else {
               console.log("Email sent: " + info.response);
-              res
-                .status(203)
-                .json({
-                  status: "passed",
-                  message: "Email sent for your reset password",
-                });
+              res.status(203).json({
+                status: "passed",
+                message: "Email sent for your reset password",
+              });
             }
           });
         } else {
@@ -209,63 +226,67 @@ class Usercontroller {
     try {
       const { password, password_confirm } = req.body;
       const { id, token } = req.params;
-
+  
       const User = await user.findById(id);
-      const secret = User._id + process.env.JWT_SECRET_KEY;
-
-      const decodedToken = jwt.verify(token, secret);
-
-      if (decodedToken.userID === User._id) {
-        if (password && password_confirm) {
-          if (password === password_confirm) {
-            const salt = await bcrypt.genSalt(10);
-            const hashpassword = await bcrypt.hash(password, salt);
-
-            await user.findByIdAndUpdate(User._id, {
-              $set: { password: hashpassword },
-            });
-
-            const mailOptions = {
-              from: process.env.EMAIL_FROM,
-              to: User.email,
-              subject: "Password changed successfully!",
-              text: "You have changed your password successfully!!",
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-              if (error) {
-                console.error(error);
-              } else {
-                console.log("Email sent: " + info.response);
-              }
-            });
-
-            res
-              .status(200)
-              .json({
-                message: "Password changed",
-                mail: "Email sent successfully",
-              });
-          } else {
-            res.status(403).json({
-              status: "failed",
-              message: "Password and confirm password do not match",
-            });
-          }
-        } else {
-          res.status(403).json({ message: "All fields are required" });
-        }
-      } else {
-        res.status(403).json({ status: "failed", message: "Invalid token" });
+      if (!User) {
+        return res.status(404).json({ status: "failed", message: "User not found" });
       }
+  
+      const secret = User._id + process.env.JWT_SECRET_KEY;
+  
+      let decodedToken;
+      try {
+        decodedToken = jwt.verify(token, secret);
+      } catch (err) {
+        console.error("Token verification error:", err);
+        return res.status(403).json({ status: "failed", message: "your session is exprie." });
+      }
+  
+      if (decodedToken.userID !== User._id.toString()) {
+        return res.status(403).json({ status: "failed", message: "Token does not match user" });
+      }
+  
+      if (!password || !password_confirm) {
+        return res.status(403).json({ message: "All fields are required" });
+      }
+  
+      if (password !== password_confirm) {
+        return res.status(403).json({ status: "failed", message: "Password and confirm password do not match" });
+      }
+  
+      const salt = await bcrypt.genSalt(10);
+      const hashpassword = await bcrypt.hash(password, salt);
+  
+      await user.findByIdAndUpdate(User._id, { $set: { password: hashpassword } });
+  
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: User.email,
+        subject: "Password changed successfully!",
+        text: "You have changed your password successfully!!",
+      };
+  
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Email send error:", error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+  
+      res.status(200).json({
+        status: "passed",
+        message: "Password changed successfully",
+        mail: "Email sent successfully",
+      });
+  
     } catch (err) {
-      console.error(err);
-      res
-        .status(404)
-        .json({ status: "failed", message: "Your link has expired" });
+      console.error("Error in userPasswordReset:", err);
+      res.status(500).json({ status: "failed", message: "Internal server error" });
     }
   };
-
+  
+  
   static userDelete = async (req, res) => {
     const { id } = req.params;
     try {
@@ -275,12 +296,24 @@ class Usercontroller {
       }
       res.status(200).json({ message: "User deleted successfully" });
     } catch (err) {
-      res.status(400).json({ status: "failed", message: "User was not deleted" });
+      res
+        .status(400)
+        .json({ status: "failed", message: "User was not deleted" });
     }
   };
   static UserLogout = async (req, res) => {
+    const {id}=req.params
     try {
+      const User=await user.findById(id)
+      if(!User){
+        res.status(400).json({"message":"user not found"})
+      }else{
+        User.loggedIn=false
+        User.loggedExpire=Date.now()
+        await User.save()
+      }
       res.clearCookie("shivam");
+
       return res.status(200).json("logout");
     } catch (err) {
       return res.status(500).json(err.message);
@@ -290,12 +323,12 @@ class Usercontroller {
   static UserEdit = async (req, res) => {
     const id = req.params.user_id;
     const User = await user.findById(id);
-    const { user_name , user_phone} = req.body;
+    const { user_name, user_phone } = req.body;
     if (!User) {
       res.status(400).json({ message: "failed" });
     } else {
       User.name = user_name;
-      User.phone=user_phone;
+      User.phone = user_phone;
       User.save();
       res.status(200).json({ message: "saved", User });
     }
@@ -371,7 +404,7 @@ class Usercontroller {
       console.error(error);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  };
 
   static order_history = async (req, res) => {
     try {
@@ -382,27 +415,111 @@ class Usercontroller {
       const User = await user.findById(id);
 
       if (!User) {
-          return res.status(404).json({
-              status: "Not Found",
-              message: "User not found in our database"
-          });
+        return res.status(404).json({
+          status: "Not Found",
+          message: "User not found in our database",
+        });
       }
       User.orderHistory = [...User.orderHistory, ...buyProducts];
 
       await User.save();
 
       return res.status(200).json({
-          status: "Success",
-          message: "Order history updated successfully"
+        status: "Success",
+        message: "Order history updated successfully",
       });
-  } catch (error) {
-      console.error('Error updating order history:', error);
+    } catch (error) {
+      console.error("Error updating order history:", error);
       return res.status(500).json({
-          status: "Error",
-          message: "An error occurred while updating order history"
+        status: "Error",
+        message: "An error occurred while updating order history",
       });
+    }
+  };
+  static userPhotoDelete = async (req, res) => {
+    const id = req.params.id;
+    console.log(`Received request to delete photo for user with id: ${id}`);
+    
+    try {
+      const User = await user.findById(id);
+      
+      if (User) {
+        console.log(`User found: ${User}`);
+        User.profileImageUrl = '';
+        await User.save();
+        res.status(200).json({ "status": "success", "message": "Image deleted successfully" });
+      } else {
+        console.log(`User not found with id: ${id}`);
+        res.status(404).json({ "status": "error", "message": "User not found" });
+      }
+    } catch (error) {
+      console.error(`Error occurred: ${error.message}`);
+      res.status(500).json({ "status": "error", "message": error.message });
+    }
   }
+  
+
+  // Adding items to the cart
+// Adding items to the cart with logging
+static cartItemsadd = async (req, res) => {
+  const userId = req.params.id;
+  const newCartItem = req.body.cartItem;
+
+  console.log("Received new cart item:", newCartItem);
+
+  try {
+    const User = await user.findById(userId);
+    console.log("Fetched user:", User);
+
+    if (User) {
+      // Check if the item already exists in the cart
+      const existingItemIndex = User.cartItem.findIndex(item => item.id === newCartItem.id);
+      console.log("Existing item index:", existingItemIndex);
+
+      if (existingItemIndex > -1) {
+        User.cartItem[existingItemIndex].quantity += newCartItem.quantity;
+      } else {
+        User.cartItem.push(newCartItem);
+      }
+
+      await User.save();
+      console.log("Updated user cart:", User.cartItem);
+      res.status(200).json({ status: "success", message: "Cart item added successfully" });
+    } else {
+      res.status(404).json({ status: "failed", message: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error in cartItemsadd:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+// Deleting items from the cart with logging
+static cartItemsdelete = async (req, res) => {
+  const userId = req.params.id;
+  const itemIdsToDelete = req.body.deleteCart;
+  console.log("Items to delete:", itemIdsToDelete);
+
+  try {
+    const User = await user.findById(userId);
+    console.log("Fetched user:", User);
+
+    if (User) {
+      User.cartItem = User.cartItem.filter(item => !itemIdsToDelete.includes(item.id));
+      await User.save();
+      console.log("Updated user cart after deletion:", User.cartItem);
+      res.status(200).json({ status: "success", message: "Cart item(s) deleted successfully" });
+    } else {
+      res.status(404).json({ status: "failed", message: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error in cartItemsdelete:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+  
 }
 
-}
 export default Usercontroller;
+

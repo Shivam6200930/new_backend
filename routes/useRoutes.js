@@ -10,8 +10,8 @@ import passport from 'passport';
 router.use('/changepassword',checkUserAuth)
 router.use('/loggedUser',checkUserAuth)
 router.use('/edit',checkUserAuth)
-router.use('/delete/:id',checkUserAuth)
-
+router.use('/cartadd/:id', Usercontroller.cartItemsadd);
+router.use('/cartdelete/:id', Usercontroller.cartItemsdelete);
 router.use('/razorpay/order',checkUserAuth)
 router.use('/razorpay/capture/:paymentId',checkUserAuth)
 router.use('/order_history/:userId',checkUserAuth)
@@ -22,10 +22,11 @@ router.get('/', (req, res) => {
 });
 router.post('/register',Usercontroller.UserRegistration)
 router.post('/login',Usercontroller.UserLogin)
+router.post('/google-login',Usercontroller.UserLoginGoogle)
 router.post('/sendresetPassword',Usercontroller.resetPassword)
-router.post('/resetPassword/:id/:token',Usercontroller.userPasswordReset)
+router.put('/resetPassword/:id/:token',Usercontroller.userPasswordReset)
 router.delete('/delete/:id',Usercontroller.userDelete)
-router.get('/logout',Usercontroller.UserLogout)
+router.get('/logout/:id',Usercontroller.UserLogout)
 router.put('/edit/:user_id',Usercontroller.UserEdit)
 router.post('/product',Usercontroller.product)
 router.get('/search',Usercontroller.search)
@@ -36,6 +37,12 @@ router.post('/razorpay/order',payment_generated)
 router.post('/razorpay/capture/:paymentId',payment)
 router.post('/order_history/:userId',Usercontroller.order_history)
 router.post('razorpay/verify-signature',verify)
+router.delete('/profileImageDelete/:id',Usercontroller.userPhotoDelete)
+// Add item(s) to the cart
+router.post('/cartadd/:id', Usercontroller.cartItemsadd);
+
+// Delete item(s) from the cart
+router.delete('/cartdelete/:id', Usercontroller.cartItemsdelete);
 // router.get('/google',
 //   passport.authenticate('google', { scope: ['profile', 'email'] }));
 

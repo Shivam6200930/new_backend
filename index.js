@@ -39,10 +39,12 @@ const DATABASE_URL = process.env.DATABASE_URL;
 connectDb(DATABASE_URL);
 
 const corsOptions = {
-  origin:process.env.frontend_url,
+  // origin:process.env.frontend_url,
+  origin:'*',
   credentials: true,
   exposedHeaders: ['Set-Cookie'],
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());

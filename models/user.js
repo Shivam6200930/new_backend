@@ -26,7 +26,10 @@ const userSchema = new mongoose.Schema({
       ],},
     profileImageUrl: { type: String},
     orderHistory: [{ type: Object }],
-    role:{type:String,required:true}
+    cartItem:[{ type: Object}],
+    role:{type:String,required:true},
+    loggedIn:{type:Boolean,deafult:false},
+    loggedExpire:{type:Date,deafult:null}
 }, { timestamps: true }); 
 
 
