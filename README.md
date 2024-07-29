@@ -69,9 +69,11 @@ To start the server locally, run the following command:
 node index.js
 ```
 and if you have nodemon install in your system then you will run the following command:
+
 ```
 nodemon index.js
 ```
+
 The server will start on `http://localhost:${port}`.
 
 
