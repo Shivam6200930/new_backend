@@ -17,12 +17,11 @@ router.use('/razorpay/capture/:paymentId',checkUserAuth)
 router.use('/order_history/:userId',checkUserAuth)
 router.use('razorpay/verify-signature',checkUserAuth)
 router.use('/contact',checkUserAuth)
-router.get('/', (req, res) => {
+router.get('/', ( res) => {
     res.send("Hello World");
 });
 router.post('/register',Usercontroller.UserRegistration)
 router.post('/login',Usercontroller.UserLogin)
-// router.post('/google-login',Usercontroller.UserLoginGoogle)
 router.post('/sendresetPassword',Usercontroller.resetPassword)
 router.put('/resetPassword/:id/:token',Usercontroller.userPasswordReset)
 router.delete('/delete/:id',Usercontroller.userDelete)
@@ -38,28 +37,11 @@ router.post('/razorpay/capture/:paymentId',payment)
 router.post('/order_history/:userId',Usercontroller.order_history)
 router.post('razorpay/verify-signature',verify)
 router.delete('/profileImageDelete/:id',Usercontroller.userPhotoDelete)
-// Add item(s) to the cart
+
 router.post('/cartadd/:id', Usercontroller.cartItemsadd);
-
-// Delete item(s) from the cart
+router.put('/cartupdate/:id', Usercontroller.cartUpdate);
 router.delete('/cartdelete/:id', Usercontroller.cartItemsdelete);
-// router.get('/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// router.get('/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/login' }),
-//   (req, res) => {
-//     res.redirect('/');
-//   });
-
-// router.get('/github',
-//   passport.authenticate('github'));
-
-// router.get('/github/callback',
-//   passport.authenticate('github', { failureRedirect: '/login' }),
-//   (req, res) => {
-//     res.redirect('/');
-//   });
 
 
 //proctece

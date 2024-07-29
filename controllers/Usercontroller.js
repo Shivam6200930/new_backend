@@ -459,37 +459,33 @@ class Usercontroller {
   }
   
 
-  // Adding items to the cart
-// Adding items to the cart with logging
 static cartItemsadd = async (req, res) => {
   const userId = req.params.id;
-  const newCartItem = req.body.cartItem;
-
-  console.log("Received new cart item:", newCartItem);
+  const updatedCartItems = req.body.cartItem;
+  console.log(updatedCartItems)
+  if (!userId || !updatedCartItems) {
+    return res.status(400).json({ status: "failed", message: "Invalid input id or cart items" });
+  }
 
   try {
     const User = await user.findById(userId);
-    console.log("Fetched user:", User);
-
     if (User) {
-      // Check if the item already exists in the cart
-      const existingItemIndex = User.cartItem.findIndex(item => item.id === newCartItem.id);
-      console.log("Existing item index:", existingItemIndex);
-
-      if (existingItemIndex > -1) {
-        User.cartItem[existingItemIndex].quantity += newCartItem.quantity;
-      } else {
-        User.cartItem.push(newCartItem);
-      }
+      updatedCartItems.forEach(newCartItem => {
+        const existingItemIndex = User.cartItem.findIndex(item => item.id === newCartItem.id);
+        if (existingItemIndex > -1) {
+          User.cartItem[existingItemIndex].quantity += newCartItem.quantity;
+        } else {
+          User.cartItem.push(newCartItem);
+        }
+      });
 
       await User.save();
-      console.log("Updated user cart:", User.cartItem);
       res.status(200).json({ status: "success", message: "Cart item added successfully" });
     } else {
       res.status(404).json({ status: "failed", message: "User not found" });
     }
   } catch (error) {
-    console.error("Error in cartItemsadd:", error);
+    console.error("Error in cartItemsAdd:", error);
     res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -518,6 +514,27 @@ static cartItemsdelete = async (req, res) => {
   }
 };
 
+ static cartUpdate=async(req,res)=>{
+  const userId = req.params.id;
+  const updatedCartItems = req.body.updateCart;
+
+  if (!userId || !Array.isArray(updatedCartItems)) {
+    return res.status(400).json({ status: "failed", message: "Invalid input" });
+  }
+
+  try {
+    const User = await user.findById(userId);
+    if (User) {
+      User.cartItem = updatedCartItems;
+      await User.save();
+      res.status(200).json({ status: "success", message: "Cart updated successfully" });
+    } else {
+      res.status(404).json({ status: "failed", message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+ }
   
 }
 
