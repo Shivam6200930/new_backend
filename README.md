@@ -33,12 +33,16 @@ To set up the project locally, follow these steps:
   ```
 
 2.Install dependencies:
+
+
 ```
 npm install
 ```
+
 3.Environment Variables:
 
 Create a .env file in the root directory and configure the following variables:
+
 
 ```
 PORT=<your port number>
