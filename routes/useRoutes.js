@@ -17,9 +17,10 @@ router.use('/razorpay/capture/:paymentId',checkUserAuth)
 router.use('/order_history/:userId',checkUserAuth)
 router.use('razorpay/verify-signature',checkUserAuth)
 router.use('/contact',checkUserAuth)
-router.get('/', ( res) => {
+router.get('/', (req, res) => {
     res.send("Hello World");
 });
+
 router.post('/register',Usercontroller.UserRegistration)
 router.post('/login',Usercontroller.UserLogin)
 router.post('/sendresetPassword',Usercontroller.resetPassword)
