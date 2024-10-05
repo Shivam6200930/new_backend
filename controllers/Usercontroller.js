@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 class Usercontroller {
-  static UserRegistration = async (req, res) => {
+static UserRegistration = async (req, res) => {
     const { name, email, password, password_confirm, phone } = req.body;
     try {
       const User = await user.findOne({ email: email });
@@ -14,8 +14,7 @@ class Usercontroller {
           if (password === password_confirm) {
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(password, salt);
-            const role =
-              email === "mandalshivam962@gmail.com" ? "admin" : "user";
+            const role = email === "mandalshivam962@gmail.com" ? "admin" : "user";
             const doc = new user({
               name: name,
               email: email,
@@ -38,11 +37,29 @@ class Usercontroller {
               path: "/",
               sameSite: "none",
             });
+  
             const mailOptions = {
               from: process.env.EMAILFROM,
               to: saved_user.email,
-              subject: "WELCOME TO OUR SHIVAM MART",
-              text: "welcome to our shivam mart here all product are avaible.",
+              subject: "Welcome to Shivam Mart!",
+              html: `
+                <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+                  <h1 style="color: #4CAF50;">Welcome to Shivam Mart, ${name}!</h1>
+                  <p>We're thrilled to have you as a member of our community.</p>
+                  <p>At Shivam Mart, we offer a wide range of products just for you. Explore our collections and enjoy exclusive deals.</p>
+                  <p><strong>Your account details:</strong></p>
+                  <ul>
+                    <li><strong>Email:</strong> ${email}</li>
+                    <li><strong>Phone:</strong> ${phone}</li>
+                  </ul>
+                  <p>To get started, simply <a href="https://front-mart-seven.vercel.app/login" style="color: #4CAF50;">log in to your account</a> and start shopping!</p>
+                  <p>If you have any questions, feel free to <a href="https://front-mart-seven.vercel.app/" style="color: #4CAF50;">contact us</a>.</p>
+                  <p>Best regards,<br/>The Shivam Mart Team</p>
+                  <div style="margin-top: 20px;">
+                    <a href="https://front-mart-seven.vercel.app/" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Visit Shivam Mart</a>
+                  </div>
+                </div>
+              `,
             };
             console.log("mailOption");
             transporter.sendMail(mailOptions, (error, info) => {
@@ -51,21 +68,10 @@ class Usercontroller {
               } else {
                 console.log("Email sent: " + info.response);
               }
-            });
-
-            res.status(200).json({
-              message: "data saved",
-              token: token,
-              mail: "email send sucessful",
-            });
-          } else {
-            res.send({
-              status: "failed",
-              message: "password and confirm password aren't match",
-            });
+            });;
           }
         } else {
-          res.send({ status: "failed", message: "all fields are required" });
+          res.send({ status: "failed", message: "All fields are required" });
         }
       }
     } catch (err) {
@@ -73,9 +79,10 @@ class Usercontroller {
       res.status(400).json(err.errors);
     }
   };
+  
 
   static UserLogin = async (req, res) => {
-    const { email, password , loggedIn } = req.body;
+    const { email, password, loggedIn } = req.body;
     try {
       if (email && password) {
         const User = await user.findOne({ email: email });
@@ -94,13 +101,12 @@ class Usercontroller {
               path: "/",
               sameSite: "none",
             });
-            User.loggedExpire=new Date(Date.now()+1000*60*60*24*7);
-            if(User.loggedExpire != Date.now()){
-              User.loggedIn=true;
-            }else{
-              User.loggedIn=false;
+            User.loggedExpire = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+            if (User.loggedExpire != Date.now()) {
+              User.loggedIn = true;
+            } else {
+              User.loggedIn = false;
             }
-            
 
             User.save();
             res
@@ -121,7 +127,6 @@ class Usercontroller {
     }
   };
 
-  
   static changeUserpassword = async (req, res) => {
     const { password, password_confirm } = req.body;
     const foundUser = await user.findById(req.user._id);
@@ -226,46 +231,59 @@ class Usercontroller {
     try {
       const { password, password_confirm } = req.body;
       const { id, token } = req.params;
-  
+
       const User = await user.findById(id);
       if (!User) {
-        return res.status(404).json({ status: "failed", message: "User not found" });
+        return res
+          .status(404)
+          .json({ status: "failed", message: "User not found" });
       }
-  
+
       const secret = User._id + process.env.JWT_SECRET_KEY;
-  
+
       let decodedToken;
       try {
         decodedToken = jwt.verify(token, secret);
       } catch (err) {
         console.error("Token verification error:", err);
-        return res.status(403).json({ status: "failed", message: "your session is exprie." });
+        return res
+          .status(403)
+          .json({ status: "failed", message: "your session is exprie." });
       }
-  
+
       if (decodedToken.userID !== User._id.toString()) {
-        return res.status(403).json({ status: "failed", message: "Token does not match user" });
+        return res
+          .status(403)
+          .json({ status: "failed", message: "Token does not match user" });
       }
-  
+
       if (!password || !password_confirm) {
         return res.status(403).json({ message: "All fields are required" });
       }
-  
+
       if (password !== password_confirm) {
-        return res.status(403).json({ status: "failed", message: "Password and confirm password do not match" });
+        return res
+          .status(403)
+          .json({
+            status: "failed",
+            message: "Password and confirm password do not match",
+          });
       }
-  
+
       const salt = await bcrypt.genSalt(10);
       const hashpassword = await bcrypt.hash(password, salt);
-  
-      await user.findByIdAndUpdate(User._id, { $set: { password: hashpassword } });
-  
+
+      await user.findByIdAndUpdate(User._id, {
+        $set: { password: hashpassword },
+      });
+
       const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: User.email,
         subject: "Password changed successfully!",
         text: "You have changed your password successfully!!",
       };
-  
+
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Email send error:", error);
@@ -273,20 +291,20 @@ class Usercontroller {
           console.log("Email sent: " + info.response);
         }
       });
-  
+
       res.status(200).json({
         status: "passed",
         message: "Password changed successfully",
         mail: "Email sent successfully",
       });
-  
     } catch (err) {
       console.error("Error in userPasswordReset:", err);
-      res.status(500).json({ status: "failed", message: "Internal server error" });
+      res
+        .status(500)
+        .json({ status: "failed", message: "Internal server error" });
     }
   };
-  
-  
+
   static userDelete = async (req, res) => {
     const { id } = req.params;
     try {
@@ -302,15 +320,15 @@ class Usercontroller {
     }
   };
   static UserLogout = async (req, res) => {
-    const {id}=req.params
+    const { id } = req.params;
     try {
-      const User=await user.findById(id)
-      if(!User){
-        res.status(400).json({"message":"user not found"})
-      }else{
-        User.loggedIn=false
-        User.loggedExpire=Date.now()
-        await User.save()
+      const User = await user.findById(id);
+      if (!User) {
+        res.status(400).json({ message: "user not found" });
+      } else {
+        User.loggedIn = false;
+        User.loggedExpire = Date.now();
+        await User.save();
       }
       res.clearCookie("shivam");
 
@@ -371,7 +389,7 @@ class Usercontroller {
     }
   };
 
-  static products = async (req, res) => {
+  static products = async (res) => {
     try {
       const products = await Product.find();
       res.json(products);
@@ -439,104 +457,55 @@ class Usercontroller {
   static userPhotoDelete = async (req, res) => {
     const id = req.params.id;
     console.log(`Received request to delete photo for user with id: ${id}`);
-    
+
     try {
       const User = await user.findById(id);
-      
+
       if (User) {
         console.log(`User found: ${User}`);
-        User.profileImageUrl = '';
+        User.profileImageUrl = "";
         await User.save();
-        res.status(200).json({ "status": "success", "message": "Image deleted successfully" });
+        res
+          .status(200)
+          .json({ status: "success", message: "Image deleted successfully" });
       } else {
         console.log(`User not found with id: ${id}`);
-        res.status(404).json({ "status": "error", "message": "User not found" });
+        res.status(404).json({ status: "error", message: "User not found" });
       }
     } catch (error) {
       console.error(`Error occurred: ${error.message}`);
-      res.status(500).json({ "status": "error", "message": error.message });
+      res.status(500).json({ status: "error", message: error.message });
     }
-  }
+  };
+
   
 
-static cartItemsadd = async (req, res) => {
-  const userId = req.params.id;
-  const updatedCartItems = req.body.cartItem;
-  console.log(updatedCartItems)
-  if (!userId || !updatedCartItems) {
-    return res.status(400).json({ status: "failed", message: "Invalid input id or cart items" });
-  }
-
-  try {
-    const User = await user.findById(userId);
-    if (User) {
-      updatedCartItems.forEach(newCartItem => {
-        const existingItemIndex = User.cartItem.findIndex(item => item.id === newCartItem.id);
-        if (existingItemIndex > -1) {
-          User.cartItem[existingItemIndex].quantity += newCartItem.quantity;
-        } else {
-          User.cartItem.push(newCartItem);
-        }
-      });
-
-      await User.save();
-      res.status(200).json({ status: "success", message: "Cart item added successfully" });
-    } else {
-      res.status(404).json({ status: "failed", message: "User not found" });
+ 
+  static addresses = async (req, res) => {
+    const userId = req.params.id;
+    const address = req.body.address;
+  
+    if (!address) {
+      return res.status(400).json({ status: "error", message: "Address is required" });
     }
-  } catch (error) {
-    console.error("Error in cartItemsAdd:", error);
-    res.status(500).json({ status: "error", message: error.message });
-  }
-};
-
-// Deleting items from the cart with logging
-static cartItemsdelete = async (req, res) => {
-  const userId = req.params.id;
-  const itemIdsToDelete = req.body.deleteCart;
-  console.log("Items to delete:", itemIdsToDelete);
-
-  try {
-    const User = await user.findById(userId);
-    console.log("Fetched user:", User);
-
-    if (User) {
-      User.cartItem = User.cartItem.filter(item => !itemIdsToDelete.includes(item.id));
+  
+    try {
+  
+      const User = await user.findById(userId);
+      if (!User) {
+        return res.status(404).json({ status: "error", message: "User not found" });
+      }
+  
+      User.address = address;
       await User.save();
-      console.log("Updated user cart after deletion:", User.cartItem);
-      res.status(200).json({ status: "success", message: "Cart item(s) deleted successfully" });
-    } else {
-      res.status(404).json({ status: "failed", message: "User not found" });
+  
+      return res.status(200).json({ status: "success", message: "Address added successfully" });
+    } catch (error) {
+      console.error("Error updating address:", error);
+      return res.status(500).json({ status: "error", message: "Something went wrong" });
     }
-  } catch (error) {
-    console.error("Error in cartItemsdelete:", error);
-    res.status(500).json({ status: "error", message: error.message });
-  }
-};
-
- static cartUpdate=async(req,res)=>{
-  const userId = req.params.id;
-  const updatedCartItems = req.body.updateCart;
-
-  if (!userId || !Array.isArray(updatedCartItems)) {
-    return res.status(400).json({ status: "failed", message: "Invalid input" });
-  }
-
-  try {
-    const User = await user.findById(userId);
-    if (User) {
-      User.cartItem = updatedCartItems;
-      await User.save();
-      res.status(200).json({ status: "success", message: "Cart updated successfully" });
-    } else {
-      res.status(404).json({ status: "failed", message: "User not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
-  }
- }
+  };
   
 }
 
 export default Usercontroller;
-
