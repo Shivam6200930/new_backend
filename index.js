@@ -39,7 +39,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 connectDb(DATABASE_URL);
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173/', // Specify your frontend URL here
+  origin: process.env.FRONTEND_URL, // Specify your frontend URL here
   credentials: true, // Allow credentials to be included in requests
   exposedHeaders: ['Set-Cookie'], // Expose Set-Cookie header
 };
