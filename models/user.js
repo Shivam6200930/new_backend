@@ -30,12 +30,11 @@ const productSchema = new mongoose.Schema({
 // Order History Schema
 const orderHistorySchema = new mongoose.Schema({
   userEmail: { type: String, trim: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "user"},
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   products: [productSchema], // Use product schema
   paymentStatus: {
     type: String,
     enum: ["Success", "Failed"],
-    // required: true,
   },
   paymentMethod: {
     type: String,
@@ -89,10 +88,10 @@ const userSchema = new mongoose.Schema(
       ],
     },
     profileImageUrl: { type: String },
-     orderHistory: [orderHistorySchema], 
+    orderHistory: [orderHistorySchema],
     cart: cartSchema,
-    role: { type: String, required: true, default: "user" }, // Correct spelling
-    loggedIn: { type: Boolean, default: false }, // Correct spelling
+    role: { type: String, required: true, default: "user" },
+    loggedIn: { type: Boolean, default: false },
     address: addressSchema, // Reuse address schema for user's address
   },
   { timestamps: true }
@@ -101,16 +100,66 @@ const userSchema = new mongoose.Schema(
 // Product Schema
 const productSchemaForModel = new mongoose.Schema(
   {
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Electronics",
+        "Clothing",
+        "Beauty",
+        "Toys",
+        "Home Appliances",
+        "Sports",
+        "Books",
+        "Groceries",
+        "Automotive",
+        "Furniture",
+        "Stationery",
+      ],
+    },
+    subcategory: {
+      type: String,
+      required: true,
+      enum: [
+        "Mobile",
+        "Laptop",
+        "Headphones",
+        "Watch",
+        "Camera",
+        "Men's Clothing",
+        "Women's Clothing",
+        "Kids' Clothing",
+        "Skincare",
+        "Makeup",
+        "Haircare",
+        "Action Figures",
+        "Educational Toys",
+        "Board Games",
+        "Kitchen Appliances",
+        "Fitness Equipment",
+        "Novels",
+        "Stationery Sets",
+        "Car Accessories",
+        "Outdoor Furniture",
+        "Dairy Products",
+      ],
+    },
     name: { type: String, required: true },
     imageUrl: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
+    specifications: {
+      type: Map,
+      of: String,
+    },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
 
-const user = mongoose.model("user", userSchema);
+const user = mongoose.model("User", userSchema);
 const Product = mongoose.model("Product", productSchemaForModel);
 
 export { user, Product };

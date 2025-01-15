@@ -38,7 +38,8 @@ router.post('/order_history/:userId', Usercontroller.order_history);
 router.post('/razorpay/verify-signature', verify);
 router.delete('/profileImageDelete/:id', Usercontroller.userPhotoDelete);
 router.post('/address/:id', Usercontroller.addresses);
-
+router.get('/getProduct',Usercontroller.getProduct)
+router.get('/gPbyCatogeries/:category',Usercontroller.getProductCategories)
 // Get cart items for a specific user
 router.get('/getCart/:userId', getCart);
 

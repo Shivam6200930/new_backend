@@ -505,7 +505,40 @@ static UserRegistration = async (req, res) => {
       return res.status(500).json({ status: "error", message: "Something went wrong" });
     }
   };
-  
+  static getProduct = async(req,res)=>{
+    try {
+      const products = await Product.find();
+      res.json(products);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  }
+  static getProductCategories = async(req,res)=>{
+    try {
+      const category = req.params.mobile;
+      console.log('categore:',category)
+      const products = await Product.find({ category });
+      res.json(products);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  }
+  static DeleteProduct = async(req,res)=>{
+    try {
+      const id = req.params.id;
+      const deletedProduct = await Product.findByIdAndDelete(id);
+      if (deletedProduct) {
+        res.json({ message: 'Product deleted', product: deletedProduct });
+      } else {
+        res.status(404).send('Product not found');
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  }
 }
 
 export default Usercontroller;
