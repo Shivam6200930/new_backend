@@ -187,7 +187,7 @@ static UserRegistration = async (req, res) => {
             expiresIn: "10m",
           });
 
-          const link = `${process.env.frontend_url}/api/users/resetPassword/${User._id}/${token}`;
+          const link = `${process.env.FRONTEND_URL}/api/users/resetPassword/${User._id}/${token}`;
           const mailOptions = {
             from: process.env.EMAIL_FROM,
             to: User.email,
