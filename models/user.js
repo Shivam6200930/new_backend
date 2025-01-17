@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 // Address Schema
 const addressSchema = new mongoose.Schema({
+  moreaddress:[{
   name: { type: String, required: true },
   phone: { type: String, required: true },
   pincode: { type: String, required: true },
@@ -11,7 +12,7 @@ const addressSchema = new mongoose.Schema({
   state: { type: String, required: true },
   landmark: { type: String },
   alternatePhone: { type: String },
-  addressType: { type: String, enum: ["Home", "Work"], default: "Home" },
+  addressType: { type: String, enum: ["Home", "Work"], default: "Home" },}]
 });
 
 // Product Schema for Embedded Documents in Cart and Order History
@@ -92,7 +93,7 @@ const userSchema = new mongoose.Schema(
     cart: cartSchema,
     role: { type: String, required: true, default: "user" },
     loggedIn: { type: Boolean, default: false },
-    address: addressSchema, // Reuse address schema for user's address
+    address: addressSchema,
   },
   { timestamps: true }
 );

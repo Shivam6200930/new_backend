@@ -496,7 +496,7 @@ static UserRegistration = async (req, res) => {
         return res.status(404).json({ status: "error", message: "User not found" });
       }
   
-      User.address = address;
+      User.address.moreaddress.push(address);
       await User.save();
   
       return res.status(200).json({ status: "success", message: "Address added successfully" });
