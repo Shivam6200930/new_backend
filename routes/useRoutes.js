@@ -4,7 +4,7 @@ import Usercontroller from '../controllers/Usercontroller.js';
 import checkUserAuth from '../middlewares/auth-middleware.js';
 import imageupload from '../controllers/imageupload.js';
 import { payment_generated, payment, verify } from '../payment/Razorpay.js';
-import {addItemToCart, updateCartItemQuantity, removeItemFromCart, getCart} from '../controllers/CartItems.js'
+import {addItemToCart, updateCartItemQuantity, removeItemFromCart, getCart, deleteCartItems} from '../controllers/CartItems.js'
 // Protected routes
 router.use('/changepassword', checkUserAuth);
 router.use('/loggedUser', checkUserAuth);
@@ -40,6 +40,7 @@ router.delete('/profileImageDelete/:id', Usercontroller.userPhotoDelete);
 router.post('/address/:id', Usercontroller.addresses);
 router.get('/getProduct',Usercontroller.getProduct)
 router.get('/gPbyCatogeries/:category',Usercontroller.getProductCategories)
+router.post('/products/byIds',Usercontroller.getProductsByIds)
 // Get cart items for a specific user
 router.get('/getCart/:userId', getCart);
 
@@ -51,6 +52,8 @@ router.post('/update/:userId', updateCartItemQuantity);
 
 // Remove an item from the cart
 router.post('/remove/:userId/:productId', removeItemFromCart);
+
+router.post('/deletecart/:userId',deleteCartItems)
 
 // Additional protected routes
 router.post('/changepassword', Usercontroller.changeUserpassword);

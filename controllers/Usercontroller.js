@@ -395,7 +395,6 @@ static UserRegistration = async (req, res) => {
       res.json(products);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Internal server error" });
     }
   };
 
@@ -428,32 +427,58 @@ static UserRegistration = async (req, res) => {
     try {
       const id = req.params.userId;
       const buyProducts = req.body.products_details;
-      console.log(`order_history ${JSON.stringify(buyProducts)}`);
-
+  
+      console.log(`order_history (buyProducts):${JSON.stringify(buyProducts)}`);
+      
+      // Find user by ID
       const User = await user.findById(id);
-
+  
       if (!User) {
         return res.status(404).json({
           status: "Not Found",
           message: "User not found in our database",
         });
       }
-      User.orderHistory = [...User.orderHistory, ...buyProducts];
+  
+      // Validate and append the order history
+      const orderData = buyProducts.map((product) => ({
+        name: product.name,
+        imageUrl: product.imageUrl,
+        description: product.description,
+         price: product.price,
+         quantity:product.quantity,
+        paymentStatus: product.paymentStatus || "Success",
+        paymentMethod: product.paymentMethod || "Razorpay",
+        orderDate: product.orderDate || new Date(),
+        deliveryStatus: product.deliveryStatus || "Order Created",
+        pincode: product.address.pincode,
+        village:product.address.address,
+        district:product.address.city,
+        state:product.address.state,
+        state:product.address.locality,
+        user_name:product.address.name,
+        user_phoneNumber:product.address.phone
 
+      }));
+  
+      User.orderHistory.push(...orderData);
+  
+      // Save the updated user
       await User.save();
-
+  
       return res.status(200).json({
         status: "Success",
         message: "Order history updated successfully",
       });
     } catch (error) {
-      console.error("Error updating order history:", error);
+      console.error("Error updating order history:", error.message);
       return res.status(500).json({
         status: "Error",
         message: "An error occurred while updating order history",
       });
     }
   };
+  
   static userPhotoDelete = async (req, res) => {
     const id = req.params.id;
     console.log(`Received request to delete photo for user with id: ${id}`);
@@ -477,9 +502,6 @@ static UserRegistration = async (req, res) => {
       res.status(500).json({ status: "error", message: error.message });
     }
   };
-
-  
-
  
   static addresses = async (req, res) => {
     const userId = req.params.id;
@@ -539,6 +561,35 @@ static UserRegistration = async (req, res) => {
       res.status(500).send('Server Error');
     }
   }
+  static getProductsByIds = async (req, res) => {
+    const productIds = req.body.productIds; 
+    console.log("productIds",req.body.productIds)
+    try {
+     
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({
+          status: "Failure",
+          message: "Invalid product IDs",
+        });
+      }
+  
+      // Fetch products from the database
+      const products = await Product.find({ _id: { $in: productIds } });
+  
+      res.status(200).json({
+        status: "Success",
+        message: "Products fetched successfully",
+        products,
+      });
+    } catch (error) {
+      console.error("Error fetching products by IDs:", error);
+      res.status(500).json({
+        status: "Failure",
+        message: "Error occurred while fetching products",
+        error: error.message,
+      });
+    }
+  };
 }
 
 export default Usercontroller;

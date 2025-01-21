@@ -32,10 +32,15 @@ const productSchema = new mongoose.Schema({
 const orderHistorySchema = new mongoose.Schema({
   userEmail: { type: String, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  products: [productSchema], // Use product schema
+  name: { type: String },
+  imageUrl: { type: String },
+  description: { type: String },
+  price:{type:Number},
+  quantity:{type:Number},
   paymentStatus: {
     type: String,
-    enum: ["Success", "Failed"],
+    enum: ["Success", "Failed","Pending"],
+    default:"Pending"
   },
   paymentMethod: {
     type: String,
@@ -45,10 +50,17 @@ const orderHistorySchema = new mongoose.Schema({
   orderDate: { type: Date, default: Date.now },
   deliveryStatus: {
     type: String,
-    enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Order Created"],
-    default: "Pending",
+    enum: ["Order Create", "Shipped", "Delivered", "Cancelled", "Order Created"],
+    default: "Order Create",
   },
-  address: addressSchema, // Reuse address schema
+  pincode:{type:Number},
+  village:{type:String},
+  district:{type:String},
+  state:{type:String},
+  locality:{type:String},
+  user_name:{type:String},
+  user_phoneNumber:{type:Number},
+
 });
 
 // Cart Schema

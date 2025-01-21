@@ -113,3 +113,28 @@ export const removeItemFromCart = async (req, res) => {
   }
 };
 
+export const deleteCartItems = async (req, res) => {
+  const { userId } = req.params; // Extract userId properly
+  try {
+    // Find user by ID
+    const User = await user.findById(userId);
+    
+    // Check if user exists
+    if (!User) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Clear cart items and save
+    User.cart.items = [];
+    await User.save();
+
+    // Respond with success message
+    res.status(200).json({ message: "Successfully deleted cart items from backend" });
+  } catch (error) {
+    // Handle error
+    console.error("Error deleting cart items:", error);
+    res.status(500).json({ message: "Unable to empty cart items" });
+  }
+};
+
+
