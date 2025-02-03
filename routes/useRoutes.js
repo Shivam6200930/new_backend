@@ -3,7 +3,7 @@ const router = express.Router();
 import Usercontroller from '../controllers/Usercontroller.js';
 import checkUserAuth from '../middlewares/auth-middleware.js';
 import imageupload from '../controllers/imageupload.js';
-import { payment_generated, payment, verify } from '../payment/Razorpay.js';
+import { payment_generated, payment, verify , sendEmailPayment } from '../payment/Razorpay.js';
 import {addItemToCart, updateCartItemQuantity, removeItemFromCart, getCart, deleteCartItems} from '../controllers/CartItems.js'
 // Protected routes
 router.use('/changepassword', checkUserAuth);
@@ -15,7 +15,7 @@ router.use('/order_history/:userId', checkUserAuth);
 router.use('/razorpay/verify-signature', checkUserAuth);
 router.use('/contact', checkUserAuth);
 
-// Public routes
+
 router.get('/', (req, res) => {
     res.send("Hello World");
 });
@@ -26,7 +26,7 @@ router.post('/sendresetPassword', Usercontroller.resetPassword);
 router.put('/resetPassword/:id/:token', Usercontroller.userPasswordReset);
 router.delete('/delete/:id', Usercontroller.userDelete);
 router.get('/logout/:id', Usercontroller.UserLogout);
-router.put('/edit/:user_id', Usercontroller.UserEdit);
+router.post('/edit/:user_id', Usercontroller.UserEdit);
 router.post('/product', Usercontroller.product);
 router.get('/search', Usercontroller.search);
 router.get('/products', Usercontroller.products);
@@ -54,6 +54,7 @@ router.post('/update/:userId', updateCartItemQuantity);
 router.post('/remove/:userId/:productId', removeItemFromCart);
 
 router.post('/deletecart/:userId',deleteCartItems)
+router.post('/payment_email/:email',sendEmailPayment)
 
 // Additional protected routes
 router.post('/changepassword', Usercontroller.changeUserpassword);

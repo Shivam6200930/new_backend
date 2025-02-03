@@ -102,12 +102,6 @@ static UserRegistration = async (req, res) => {
               sameSite: "none",
             });
             User.loggedExpire = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
-            if (User.loggedExpire != Date.now()) {
-              User.loggedIn = true;
-            } else {
-              User.loggedIn = false;
-            }
-
             User.save();
             res
               .status(200)
@@ -145,9 +139,26 @@ static UserRegistration = async (req, res) => {
         const mailOptions = {
           from: process.env.EMAILFROM,
           to: foundUser.email,
-          subject: "Password changed",
-          text: "You sucessful change your password if you have not changed your password then you info our contact detailas",
-        };
+          subject: "🔐 Your Shivam Mart Password Has Been Changed",
+                    html: `
+                      <div style="max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; background: #f9f9f9; font-family: Arial, sans-serif; text-align: center; border: 1px solid #ddd;">
+                          <h2 style="color: #333;">🔔 Password Change Alert</h2>
+                          <p style="font-size: 16px; color: #555;">Dear <strong>${foundUser.name}</strong>,</p>
+                          <p style="font-size: 16px; color: #555;">We wanted to let you know that your Shivam Mart account password has been successfully changed.</p>
+                          <p style="font-size: 16px; color: #555;">If you made this change, you can safely ignore this email.</p>
+                          
+                          <div style="margin: 20px 0;">
+                              <p style="font-size: 16px; color: #d9534f; font-weight: bold;">Didn’t request this change?</p>
+                              <p style="font-size: 14px; color: #555;">If you did not request this password change, please secure your account immediately by resetting your password.</p>
+                              <a href="${process.env.FRONTEND_URL}/forgetpassword" style="background-color: #ff4d4d; color: white; padding: 12px 20px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block;">🔄 Reset Password</a>
+                          </div>
+
+                          <hr style="margin: 20px 0;">
+                          <p style="font-size: 14px; color: #777;">If you need help, please contact our <a href="${process.env.FRONTEND_URL}/support" style="color: #007bff; text-decoration: none;">Support Team</a>.</p>
+                          <p style="font-size: 14px; color: #777;">Thank you for using <strong>Shivam Mart</strong>! 🛍️</p>
+                      </div>
+                    `,
+         };
         console.log("mailOption");
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
@@ -191,9 +202,21 @@ static UserRegistration = async (req, res) => {
           const mailOptions = {
             from: process.env.EMAIL_FROM,
             to: User.email,
-            subject: "Shivam Mart Password Reset Link",
-            text: "This mail is only for a password reset",
-            html: `<a href=${link}>Click Here</a> to reset your password`,
+            subject: "🔒 Reset Your Password - Shivam Mart",
+            html: `
+            <div style="max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; background: #f9f9f9; font-family: Arial, sans-serif; text-align: center; border: 1px solid #ddd;">
+              <h2 style="color: #333;">🔐 Password Reset Request</h2>
+              <p style="font-size: 16px; color: #555;">Hello <strong>${User.name}</strong>,</p>
+              <p style="font-size: 16px; color: #555;">We received a request to reset your password for Shivam Mart.</p>
+              <p style="font-size: 16px; color: #555;">Click the button below to reset your password:</p>
+              <div style="margin: 20px 0;">
+                <a href="${link}" style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block;">🔄 Reset Password</a>
+              </div>
+              <p style="font-size: 14px; color: #777;">This link is valid for <strong>10 minutes</strong>. If you did not request a password reset, please ignore this email.</p>
+              <hr style="margin: 20px 0;">
+              <p style="font-size: 14px; color: #777;">Thank you for choosing <strong>Shivam Mart</strong>.</p>
+            </div>
+          `,
           };
 
           transporter.sendMail(mailOptions, (error, info) => {
@@ -281,7 +304,18 @@ static UserRegistration = async (req, res) => {
         from: process.env.EMAIL_FROM,
         to: User.email,
         subject: "Password changed successfully!",
-        text: "You have changed your password successfully!!",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9; text-align: center;">
+            <h2 style="color: #333;">Password Reset Confirmation</h2>
+            <p style="font-size: 16px; color: #555;">Hello <strong>${User.name}</strong>,</p>
+            <p style="font-size: 16px; color: #555;">Your password has been successfully changed.</p>
+            <p style="font-size: 16px; color: #555;">If you did not request this change, please contact our support team immediately.</p>
+            <div style="margin: 20px 0;">
+              <a href="${process.env.FRONTEND_URL}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">Visit ShivamMart</a>
+            </div>
+            <p style="font-size: 14px; color: #777;">Thank you for using ShivamMart.</p>
+          </div>
+        `,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -341,12 +375,11 @@ static UserRegistration = async (req, res) => {
   static UserEdit = async (req, res) => {
     const id = req.params.user_id;
     const User = await user.findById(id);
-    const { user_name, user_phone } = req.body;
+    const { user_name } = req.body;
     if (!User) {
       res.status(400).json({ message: "failed" });
     } else {
       User.name = user_name;
-      User.phone = user_phone;
       User.save();
       res.status(200).json({ message: "saved", User });
     }
