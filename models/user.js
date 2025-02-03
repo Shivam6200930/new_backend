@@ -50,7 +50,7 @@ const orderHistorySchema = new mongoose.Schema({
   orderDate: { type: Date, default: Date.now },
   deliveryStatus: {
     type: String,
-    enum: ["Order Create", "Shipped", "Delivered", "Cancelled", "Order Created"],
+    enum: ["Order Create", "shipped", "delivered", "Cancelled", "Order Created"],
     default: "Order Create",
   },
   pincode:{type:Number},
