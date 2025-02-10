@@ -1,7 +1,8 @@
-import { user, Product } from "../models/user.js";
+import { user, Product , productSchemaForModel ,Order} from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
+import mongoose from 'mongoose'
 class Usercontroller {
 static UserRegistration = async (req, res) => {
     const { name, email, password, password_confirm, phone } = req.body;
@@ -384,8 +385,8 @@ static UserRegistration = async (req, res) => {
       res.status(200).json({ message: "saved", User });
     }
   };
-  static product = async (req, res) => {
-    const { name, imageUrl, description, price, quantity } = req.body;
+  static addProduct = async (req, res) => {
+    const { name, imageUrl, description, price, quantity,category,subcategory,specifications } = req.body;
     try {
       const doc = new Product({
         name: name,
@@ -393,6 +394,9 @@ static UserRegistration = async (req, res) => {
         description: description,
         price: price,
         quantity: quantity,
+        category,
+        subcategory,
+        specifications
       });
 
       await doc.save();
@@ -422,12 +426,13 @@ static UserRegistration = async (req, res) => {
     }
   };
 
-  static products = async (res) => {
+  static findAllProduct = async (req, res) => {
     try {
-      const products = await Product.find();
-      res.json(products);
+      const products = await Product.find(); // Assuming ProductModel is your Mongoose model
+      res.status(200).json({ products }); // Return products as an array
     } catch (error) {
       console.error(error);
+      res.status(500).json({ message: "Server error" });
     }
   };
 
@@ -460,9 +465,7 @@ static UserRegistration = async (req, res) => {
     try {
       const id = req.params.userId;
       const buyProducts = req.body.products_details;
-  
-      console.log(`order_history (buyProducts):${JSON.stringify(buyProducts)}`);
-      
+      const orderId =req.body.orderId;
       // Find user by ID
       const User = await user.findById(id);
   
@@ -475,6 +478,7 @@ static UserRegistration = async (req, res) => {
   
       // Validate and append the order history
       const orderData = buyProducts.map((product) => ({
+        _id: orderId || new mongoose.Types.ObjectId(),
         name: product.name,
         imageUrl: product.imageUrl,
         description: product.description,
@@ -560,15 +564,7 @@ static UserRegistration = async (req, res) => {
       return res.status(500).json({ status: "error", message: "Something went wrong" });
     }
   };
-  static getProduct = async(req,res)=>{
-    try {
-      const products = await Product.find();
-      res.json(products);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
-    }
-  }
+  
   static getProductCategories = async(req,res)=>{
     try {
       const category = req.params.mobile;
@@ -582,8 +578,8 @@ static UserRegistration = async (req, res) => {
   }
   static DeleteProduct = async(req,res)=>{
     try {
-      const id = req.params.id;
-      const deletedProduct = await Product.findByIdAndDelete(id);
+      const {productId } = req.params;
+      const deletedProduct = await Product.findByIdAndDelete(productId );
       if (deletedProduct) {
         res.json({ message: 'Product deleted', product: deletedProduct });
       } else {
@@ -595,24 +591,30 @@ static UserRegistration = async (req, res) => {
     }
   }
   static getProductsByIds = async (req, res) => {
-    const productIds = req.body.productIds; 
-    console.log("productIds",req.body.productIds)
     try {
-     
+      const { productIds } = req.body; // Expect an array from frontend
+  
       if (!Array.isArray(productIds) || productIds.length === 0) {
         return res.status(400).json({
           status: "Failure",
-          message: "Invalid product IDs",
+          message: "Invalid or empty product IDs array",
         });
       }
   
-      // Fetch products from the database
+      // Fetch products that match any of the given IDs
       const products = await Product.find({ _id: { $in: productIds } });
+  
+      if (!products.length) {
+        return res.status(404).json({
+          status: "Failure",
+          message: "No products found for the given IDs",
+        });
+      }
   
       res.status(200).json({
         status: "Success",
         message: "Products fetched successfully",
-        products,
+        products, // Now returns an array of products
       });
     } catch (error) {
       console.error("Error fetching products by IDs:", error);
@@ -623,6 +625,148 @@ static UserRegistration = async (req, res) => {
       });
     }
   };
+  
+
+  static getAllCategories = async (req, res) => {
+    try {
+      // Access the enum values directly from the schema definition
+      const subcategories = productSchemaForModel.path("subcategory").enumValues;
+      const categories =productSchemaForModel.path("category").enumValues
+      
+  
+      res.status(200).json({
+        success: true,
+        cat:subcategories, 
+        c_cat:categories
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve categories",
+        error: error.message,
+      });
+    }
+  };
+
+  static getCatProducts=async(req,res)=>{
+    try {
+      const { category_get } = req.params;
+      console.log(`category_get:${category_get}`)
+      
+      // Retrieve products based on category
+      const products = await Product.find({ subcategory:category_get });
+      
+      // If no products are found for the category
+      if (!products || products.length === 0) {
+        return res.status(404).json({ message: 'No products found for this category' });
+      }
+  
+      // Return the products in an array
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error });
+    }
+  }
+  
+
+  static productUpdate = async (req, res) => {
+    try {
+      const { _id, ...updateData } = req.body;
+      const updatedProduct = await Product.findByIdAndUpdate(_id, updateData, { new: true });
+  
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      res.json({ message: "Product updated successfully", product: updatedProduct });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+static productfetchDetails =async(req,res)=>{
+  try {
+    const { productId } = req.params; // Extract productId as a string
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid product ID format" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ product });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching product", error: error.message });
+  }
 }
+
+ static newOrder = async(req,res)=>{
+  try {
+    const newOrder = new Order(req.body);
+    await newOrder.save();
+    res.status(201).json({status:"Successfuly",newOrder});
+  } catch (error) {
+    res.status(500).json({ message: "Error creating order", error });
+  }
+ }
+
+ static async fetchAllOrder(req, res) {
+  try {
+    const orders = await Order.find().populate("user").populate("products.productId");
+    res.status(200).json({ status: "Successfully", orders });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching orders", error });
+  }
+}
+  
+static updatedOrder = async (req, res) => {
+  const { orderId, userId } = req.params;
+  const { deliveryStatus } = req.body;
+  try {
+   if(!deliveryStatus){
+    return res.status(400).json({status:"failed from frontend",message:"deliveryStatus are not come from frontend "})
+   }
+
+    // Find user by userId
+    const User = await user.findById(userId);
+    if (!User) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const OrdersId = await Order.findById(orderId)
+    if(!OrdersId){
+      return res.status(404).JSON({status:"failed",message:"order are not found"})
+    }
+
+    // Find the specific order in user's order history
+    const orderIndex = User.orderHistory.findIndex(order => order._id.toString() === orderId);
+    if (orderIndex === -1) {
+      return res.status(404).json({ message: "Order not found in user's order history" });
+    }
+
+    // Update the delivery status of the found order
+    User.orderHistory[orderIndex].deliveryStatus = deliveryStatus;
+    OrdersId.deliveryStatus=deliveryStatus
+
+    // Save the updated user document
+    await OrdersId.save();
+    await User.save();
+
+    res.status(200).json({ 
+      status: "Successfully updated", 
+      updatedOrder: User.orderHistory[orderIndex] 
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error updating order", error: error.message });
+  }
+};
+
+}
+
 
 export default Usercontroller;

@@ -1,6 +1,57 @@
 import mongoose from "mongoose";
 
 // Address Schema
+const orderSchema = new mongoose.Schema(
+  {
+    _id:{type:String,requried:true},
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    products: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        name: { type: String, required: true },
+        quantity: { type: Number, required: true },
+        total: { type: Number, required: true },
+      },
+    ],
+    paymentStatus: {
+      type: String,
+      enum: ["Success", "Failed", "Pending"],
+      default: "Pending",
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["Razorpay", "Paypal", "Stripe", "Cash On Delivery"],
+      default: "Razorpay",
+    },
+    orderDate: { type: Date, default: Date.now },
+    deliveryStatus: {
+      type: String,
+      enum: ["Order Create", "shipped", "delivered", "Cancelled", "Order Created"],
+      default: "Order Created",
+    },
+    shippingAddress: {
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+      pincode: { type: Number, required: true },
+      locality: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      landmark: { type: String },
+      alternatePhone: { type: String },
+    },
+  },
+  { timestamps: true }
+);
+
 const addressSchema = new mongoose.Schema({
   moreaddress:[{
   name: { type: String, required: true },
@@ -30,6 +81,7 @@ const productSchema = new mongoose.Schema({
 
 // Order History Schema
 const orderHistorySchema = new mongoose.Schema({
+  _id: { type: String, required: true },
   userEmail: { type: String, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   name: { type: String },
@@ -51,7 +103,7 @@ const orderHistorySchema = new mongoose.Schema({
   deliveryStatus: {
     type: String,
     enum: ["Order Create", "shipped", "delivered", "Cancelled", "Order Created"],
-    default: "Order Create",
+    default: "Order Created",
   },
   pincode:{type:Number},
   village:{type:String},
@@ -174,5 +226,5 @@ const productSchemaForModel = new mongoose.Schema(
 
 const user = mongoose.model("User", userSchema);
 const Product = mongoose.model("Product", productSchemaForModel);
-
-export { user, Product };
+const Order = mongoose.model("Order", orderSchema);
+export { user, Product , productSchemaForModel , Order};
