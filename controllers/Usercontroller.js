@@ -543,27 +543,38 @@ static UserRegistration = async (req, res) => {
   static addresses = async (req, res) => {
     const userId = req.params.id;
     const address = req.body.address;
-  
+
     if (!address) {
-      return res.status(400).json({ status: "error", message: "Address is required" });
+        return res.status(400).json({ status: "error", message: "Address is required" });
     }
-  
+
     try {
-  
-      const User = await user.findById(userId);
-      if (!User) {
-        return res.status(404).json({ status: "error", message: "User not found" });
-      }
-  
-      User.address.moreaddress.push(address);
-      await User.save();
-  
-      return res.status(200).json({ status: "success", message: "Address added successfully" });
+        const User = await user.findById(userId);
+
+        if (!User) {
+            return res.status(404).json({ status: "error", message: "User not found" });
+        }
+
+        // Ensure User.address is initialized
+        if (!User.address) {
+            User.address = { moreaddress: [] }; // Initialize if undefined
+        }
+
+        // Ensure moreaddress array exists
+        if (!Array.isArray(User.address.moreaddress)) {
+            User.address.moreaddress = [];
+        }
+
+        User.address.moreaddress.push(address);
+        await User.save();
+
+        return res.status(200).json({ status: "success", message: "Address added successfully" });
     } catch (error) {
-      console.error("Error updating address:", error);
-      return res.status(500).json({ status: "error", message: "Something went wrong" });
+        console.error("Error updating address:", error);
+        return res.status(500).json({ status: "error", message: "Something went wrong" });
     }
-  };
+};
+
   
   static getProductCategories = async(req,res)=>{
     try {
